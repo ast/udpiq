@@ -1,3 +1,5 @@
 udpiq
 *.o
 *~
+.DS_Store
+._*

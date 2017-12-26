@@ -17,7 +17,7 @@
 
 #include "alsa.h"
 
-const int N = 1024;
+const int N = 512;
 const int FRAME_SIZE = sizeof(float) * 2;
 
 int create_socket_inet(const char *addr, struct sockaddr_in *si_other) {
@@ -54,7 +54,8 @@ int main(int argc, const char * argv[]) {
     int sd = 0;
     
     if (argc < 3) {
-        fprintf(stderr, "usage.\n");
+        fprintf(stderr, "usage:\n");
+        fprintf(stderr, "udpiq DEVICE ADDRESS\n");
         exit(EXIT_FAILURE);
     }
     
@@ -104,7 +105,7 @@ int main(int argc, const char * argv[]) {
         err = sendto(sd,
                      (void*)data,
                      FRAME_SIZE * m_frames,
-                     MSG_DONTWAIT,
+                     MSG_DONTWAIT, // don't block
                      (struct sockaddr*) &client,
                      sizeof(struct sockaddr));
         

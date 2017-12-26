@@ -11,7 +11,6 @@
 /* Try to get an ALSA capture handle */
 snd_pcm_t* sdr_pcm_handle(const char* pcm_name, snd_pcm_uframes_t frames, snd_pcm_stream_t stream) {
     snd_pcm_t *pcm_handle;
-    //snd_pcm_stream_t stream = SND_PCM_STREAM_CAPTURE;
     snd_pcm_hw_params_t *hwparams;
     
     const unsigned int rate = 39000;      // Fixed sample rate of VFZSDR.
