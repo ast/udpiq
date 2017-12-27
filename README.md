@@ -9,6 +9,7 @@ Usable with GNU Radio UDP source (**port 7373 payload size 4096**).
 
 ## ideas for improvement aka TODO
 
+* Add assertion that we got the frames we asked for.
 * Using `connect` on the UDP socket will make it go faster.
 * Reducing UDP packet size to 1472 bytes (because Ethernet 1500 bytes MTU) will probably avoid fragmentation, experiment with `ping`.
 * ALSA period size doesn't have to be a power of two. Adapt period size to fit into 1472 bytes.
