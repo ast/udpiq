@@ -30,7 +30,6 @@ pcm.sdr {
     type plug
     slave {
         pcm "hw:vfzfpga,0"
-        rate 39000 # Maybe not neceessary
         format S32_LE
     }
 }
