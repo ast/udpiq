@@ -17,13 +17,18 @@
 
 #include "alsa.h"
 
-const int N = 512;
+// 1472
+const int N = 1024;
+
 const int FRAME_SIZE = sizeof(float) * 2;
 
-int create_socket_inet(const char *addr, struct sockaddr_in *si_other) {
+int create_socket_inet(const char *addr) {
     int sd = 0;
     ssize_t err = 0;
     static const int send_buf_periods = 4;
+    
+    struct sockaddr_in client;
+    memset(&client, 0x00, sizeof(client));
     
     sd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if(sd < 0) {
@@ -31,10 +36,10 @@ int create_socket_inet(const char *addr, struct sockaddr_in *si_other) {
         exit(EXIT_FAILURE);
     }
     
-    si_other->sin_family = AF_INET;
-    si_other->sin_port = htons(7373);
+    client.sin_family = AF_INET;
+    client.sin_port = htons(7373);
     
-    if (inet_aton(addr, &si_other->sin_addr) == 0) {
+    if (inet_aton(addr, &client.sin_addr) == 0) {
         perror("inet_aton");
         exit(EXIT_FAILURE);
     }
@@ -43,6 +48,11 @@ int create_socket_inet(const char *addr, struct sockaddr_in *si_other) {
     err = setsockopt(sd, SOL_SOCKET, SO_SNDBUF, &send_buf_size, sizeof(send_buf_size));
     if(err < 0) {
         perror("setsockopt");
+        exit(EXIT_FAILURE);
+    }
+    
+    if(connect(sd, (struct sockaddr*) &client, sizeof(client)) < 0) {
+        perror("connect");
         exit(EXIT_FAILURE);
     }
     
@@ -59,8 +69,8 @@ int main(int argc, const char * argv[]) {
         exit(EXIT_FAILURE);
     }
     
-    struct sockaddr_in client;
-    sd = create_socket_inet(argv[2], &client);
+
+    sd = create_socket_inet(argv[2]);
     
     snd_pcm_t *pcm = sdr_pcm_handle(argv[1], N, SND_PCM_STREAM_CAPTURE);
     
@@ -77,7 +87,7 @@ int main(int argc, const char * argv[]) {
         if((err = snd_pcm_wait(pcm, -1)) < 0) {
             fprintf(stderr, "sndpcm wait %d\n", (int) err);
             snd_pcm_recover(pcm, (int)err, 0);
-            continue;
+            //continue;
         }
         
         frames = snd_pcm_avail_update(pcm);
@@ -99,19 +109,7 @@ int main(int argc, const char * argv[]) {
         //printf("%lu %lu\n", (unsigned long)m_areas[0].addr, m_offset);
 
         float *data = &m_areas[0].addr[m_offset * FRAME_SIZE];
-        //printf("%f\n", data[100]);
-        
-        // Send to spectrum socket
-        err = sendto(sd,
-                     (void*)data,
-                     FRAME_SIZE * m_frames,
-                     MSG_DONTWAIT, // don't block
-                     (struct sockaddr*) &client,
-                     sizeof(struct sockaddr));
-        
-        if(err < 0) {
-            perror("send()\n");
-        }
+        err = send(sd, (void*)data, FRAME_SIZE * N, MSG_DONTWAIT);
         
         // we are finished
         err = snd_pcm_mmap_commit(pcm, m_offset, m_frames);

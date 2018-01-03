@@ -13,8 +13,8 @@ snd_pcm_t* sdr_pcm_handle(const char* pcm_name, snd_pcm_uframes_t frames, snd_pc
     snd_pcm_t *pcm_handle;
     snd_pcm_hw_params_t *hwparams;
     
-    const unsigned int rate = 39000;      // Fixed sample rate of VFZSDR.
-    const unsigned int periods = 3;       // Number of periods in ALSA ringbuffer.
+    const unsigned int rate = 78125;      // Fixed sample rate of VFZSDR.
+    const unsigned int periods = 4;       // Number of periods in ALSA ringbuffer.
     
     snd_pcm_hw_params_alloca(&hwparams);
     
